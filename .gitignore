@@ -26,6 +26,9 @@ build/
 # config.json is tracked for template
 .claude/
 
+# Docker environment
+.env
+
 # Temporary files
 tmp/
 temp/

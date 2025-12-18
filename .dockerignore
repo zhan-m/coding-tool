@@ -1,0 +1,5 @@
+# Docker 相关文件
+.env
+
+# Docker 构建缓存
+.dockerignore

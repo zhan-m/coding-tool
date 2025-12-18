@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  coding-tool:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: coding-tool
+    image: coding-tool:latest
+
+    ports:
+      # Web UI + WebSocket
+      - "${WEB_UI_PORT:-10099}:10099"
+      # Claude 代理
+      - "${CLAUDE_PROXY_PORT:-10088}:10088"
+      # Codex 代理
+      - "${CODEX_PROXY_PORT:-10089}:10089"
+      # Gemini 代理
+      - "${GEMINI_PROXY_PORT:-10090}:10090"
+
+    volumes:
+      # 管理宿主机的 CLI 数据（默认模式）
+      # 可以访问和管理已有的会话
+      - ${HOME}/.claude:/root/.claude
+      - ${HOME}/.codex:/root/.codex
+      - ${HOME}/.gemini:/root/.gemini
+      - ${HOME}/.cc-tool:/root/.cc-tool
+      # 项目配置文件（可选，如果想自定义配置）
+      - ./config.json:/app/config.json:ro
+
+    environment:
+      - NODE_ENV=production
+      - TZ=${TZ:-Asia/Shanghai}
+      # 可选：通过环境变量覆盖端口配置
+      - WEB_UI_PORT=${WEB_UI_PORT:-10099}
+      - CLAUDE_PROXY_PORT=${CLAUDE_PROXY_PORT:-10088}
+      - CODEX_PROXY_PORT=${CODEX_PROXY_PORT:-10089}
+      - GEMINI_PROXY_PORT=${GEMINI_PROXY_PORT:-10090}
+
+    restart: unless-stopped
+
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:10099/api/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # 网络模式
+    network_mode: "bridge"

@@ -137,9 +137,9 @@ async function startServer(port) {
   }
 
   // Start server
-  const server = app.listen(port, () => {
+  const server = app.listen(port, '0.0.0.0', () => {
     console.log(`\n🚀 Coding-Tool Web UI running at:`);
-    console.log(`   http://localhost:${port}`);
+    console.log(`   http://0.0.0.0:${port}`);
 
     // 附加 WebSocket 服务器到同一个端口
     attachWebSocketServer(server);

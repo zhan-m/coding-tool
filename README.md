@@ -45,6 +45,24 @@
 npm install -g coding-tool
 ```
 
+### Docker（推荐用于生产环境）
+
+```bash
+# 克隆仓库
+git clone https://github.com/CooperJiang/cc-tool.git
+cd cc-tool
+
+# 使用快速启动脚本
+./docker-start.sh
+
+# 或手动启动
+docker compose up -d
+```
+
+**访问地址**：`http://localhost:10099`
+
+📖 详细文档：[Docker 部署指南](docs/DOCKER.md)
+
 ### 从源码构建
 
 ```bash
