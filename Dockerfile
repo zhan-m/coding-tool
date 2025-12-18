@@ -40,7 +40,7 @@ COPY docs/ ./docs/
 COPY CHANGELOG.md README.md LICENSE ./
 
 # 从前端构建阶段复制构建产物
-COPY --from=frontend-builder /app/frontend/dist ../dist/web
+COPY --from=frontend-builder /dist/web ./dist/web
 
 # 创建必要的目录
 RUN mkdir -p /root/.claude/cc-tool \
