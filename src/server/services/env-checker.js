@@ -59,6 +59,28 @@ const SYSTEM_CONFIG_FILES = [
 ];
 
 /**
+ * 检测是否在 Docker 容器中运行
+ */
+function isRunningInDocker() {
+  try {
+    // 方法 1: 检查 /.dockerenv 文件
+    if (fs.existsSync('/.dockerenv')) {
+      return true;
+    }
+
+    // 方法 2: 检查 cgroup
+    const cgroupContent = fs.readFileSync('/proc/self/cgroup', 'utf-8');
+    if (cgroupContent.includes('docker') || cgroupContent.includes('kubepods')) {
+      return true;
+    }
+  } catch (err) {
+    // 如果检查失败，假设不在容器中
+  }
+
+  return false;
+}
+
+/**
  * 检测环境变量冲突
  * @param {string} platform - 平台名称: claude/codex/gemini，不传则检测所有
  * @returns {Array} 冲突列表
@@ -66,15 +88,21 @@ const SYSTEM_CONFIG_FILES = [
 function checkEnvConflicts(platform = null) {
   const keywords = getKeywords(platform);
   const conflicts = [];
+  const inDocker = isRunningInDocker();
 
   // 1. 检测当前进程环境变量
   conflicts.push(...checkProcessEnv(keywords));
 
-  // 2. 检测用户 shell 配置文件
-  conflicts.push(...checkShellConfigs(keywords));
+  // 2. 在 Docker 环境中跳过 shell 配置文件扫描
+  // 原因: 容器内的 shell 配置来自宿主机挂载，不会影响容器进程
+  if (!inDocker) {
+    conflicts.push(...checkShellConfigs(keywords));
+  }
 
-  // 3. 检测系统配置文件
-  conflicts.push(...checkSystemConfigs(keywords));
+  // 3. 在 Docker 环境中跳过系统配置文件扫描
+  if (!inDocker) {
+    conflicts.push(...checkSystemConfigs(keywords));
+  }
 
   // 去重（同一变量可能在多处定义）
   return deduplicateConflicts(conflicts);
