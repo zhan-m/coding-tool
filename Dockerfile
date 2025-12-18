@@ -6,7 +6,9 @@ WORKDIR /app/frontend
 
 # 复制前端项目文件
 COPY src/web/package*.json ./
-RUN npm ci --only=production
+
+# 安装所有依赖（包括 devDependencies，因为构建需要）
+RUN npm ci
 
 COPY src/web/ ./
 
